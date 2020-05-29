@@ -13,7 +13,7 @@ class SignIn extends Component {
     const password = event.target.elements['form-password'].value;
 
     const user = {
-      email, password,
+      UserEmail: email, UserPassword: password,
     };
     console.log('calling sign in');
     this.props.signinUser(user, this.props.history);
@@ -33,7 +33,7 @@ class SignIn extends Component {
             <Form.Control type="password" placeholder="Enter password" />
           </Form.Group>
           <Button variant="primary" type="submit">
-            Submit
+            Sign In
           </Button>
         </Form>
       </Container>

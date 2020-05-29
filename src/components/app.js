@@ -5,6 +5,7 @@ import {
 
 import NewProduct from './newproduct';
 import NewStore from './newstore';
+import EditStore from './editstore';
 import Products from './products';
 import Stores from './stores';
 import SignIn from './signin';
@@ -12,7 +13,7 @@ import SignUp from './signup';
 import NavBar from './navbar';
 import Home from './home';
 
-// import PrivateRoute from './privateRoute';
+import PrivateRoute from './privateRoute';
 
 
 const App = (props) => {
@@ -21,13 +22,14 @@ const App = (props) => {
       <div>
         <NavBar />
         <Switch>
-          <Route exact path="/" component={Home} />
-          <Route path="/products/new" component={NewProduct} />
-          <Route path="/stores/new" component={NewStore} />
+          <PrivateRoute exact path="/" component={Home} />
+          <PrivateRoute path="/products/new" component={NewProduct} />
+          <PrivateRoute path="/stores/new" component={NewStore} />
+          <PrivateRoute path="/stores/edit" component={EditStore} />
           <Route path="/signin" component={SignIn} />
           <Route path="/signup" component={SignUp} />
-          <Route path="/products" component={Products} />
-          <Route path="/stores" component={Stores} />
+          <PrivateRoute path="/products" component={Products} />
+          <PrivateRoute path="/stores" component={Stores} />
           {/* <Route path="/posts/:id" component={Post} /> */}
           <Route render={() => (<div>post not found </div>)} />
         </Switch>

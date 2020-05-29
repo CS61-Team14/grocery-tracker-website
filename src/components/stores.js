@@ -3,23 +3,31 @@ import React, { Component } from 'react';
 import {
   Table, Container, Button, ButtonGroup,
 } from 'react-bootstrap';
-import { fetchStores, deleteStore } from '../actions/index';
+import { fetchStores, deleteStore, setStore } from '../actions/index';
 
 class Stores extends Component {
   componentDidMount() {
-    // this.props.fetchStores();
+    this.props.fetchStores();
+  }
+
+  handleDelete = (id) => {
+    this.props.deleteStore(id, this.props.history);
   }
 
   render() {
     const storeItems = this.props.stores.map((store) => {
       return (
-        <tr key={store.id}>
-          <td>{store.name}</td>
-          <td>{store.address}</td>
+        <tr key={store.StoreID}>
+          <td>{store.StoreName}</td>
+          <td>{store.StoreCity}</td>
+          <td>{`${store.StoreStreetNum} ${store.StoreStreet}`}</td>
+          <td>{store.StoreZIP}</td>
           <td>
             <ButtonGroup className="button-group" aria-label="First group">
-              <Button variant="primary" styles={{ flex: 1 }}>  Edit  </Button>
-              <Button variant="danger" onClick={() => { this.props.deleteStore(store.id); }} styles={{ flex: 1 }}>Delete</Button>
+              <Button variant="primary" onClick={() => { this.props.setStore(store); this.props.history.push('stores/edit'); }} styles={{ flex: 1 }}>  Edit  </Button>
+              {/* <Button variant="danger" onClick={() => { this.props.deleteStore(store.StoreID); }} styles={{ flex: 1 }}>{store.StoreID}</Button> */}
+              <Button variant="danger" onClick={() => { this.handleDelete(store.StoreID); }} styles={{ flex: 1 }}>Delete</Button>
+
             </ButtonGroup>
           </td>
         </tr>
@@ -33,8 +41,10 @@ class Stores extends Component {
         <Table striped bordered hover className="table">
           <thead>
             <tr>
-              <th>Store Name</th>
-              <th>Address</th>
+              <th>Name</th>
+              <th>City</th>
+              <th>Street Address</th>
+              <th>Zip Code</th>
               <th className="col-small">Actions</th>
             </tr>
           </thead>
@@ -54,5 +64,4 @@ function mapStateToProps(reduxState) {
   };
 }
 
-export default connect(mapStateToProps, { fetchStores, deleteStore })(Stores);
-// export default Products;
+export default connect(mapStateToProps, { fetchStores, deleteStore, setStore })(Stores);

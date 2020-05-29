@@ -14,7 +14,7 @@ class SignUp extends Component {
     const username = event.target.elements['form-username'].value;
 
     const user = {
-      email, password, username,
+      UserEmail: email, UserPassword: password, UserName: username,
     };
     this.props.signupUser(user, this.props.history);
   }
@@ -37,7 +37,7 @@ class SignUp extends Component {
             <Form.Control type="password" placeholder="Enter password" />
           </Form.Group>
           <Button variant="primary" type="submit">
-            Submit
+            Sign Up
           </Button>
         </Form>
       </Container>

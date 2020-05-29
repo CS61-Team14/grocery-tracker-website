@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const ROOT_URL = 'https://rodrigo-lab5.herokuapp.com/api';
-// const ROOT_URL = 'http://localhost:9090/api';
+const ROOT_URL = 'http://localhost:3307/api';
 
 // keys for actiontypes
 export const ActionTypes = {
@@ -12,15 +11,19 @@ export const ActionTypes = {
   AUTH_USER: 'AUTH_USER',
   DEAUTH_USER: 'DEAUTH_USER',
   AUTH_ERROR: 'AUTH_ERROR',
+  SET_STORE: 'SET_STORE',
 };
 
-export function fetchProductss() {
+export function fetchProducts() {
   /* axios get */
   return (dispatch) => {
-    axios.get(`${ROOT_URL}/products`)
+    axios
+      .get(`${ROOT_URL}/productsByUser`, {
+        headers: { authorization: localStorage.getItem('token') },
+      })
       .then((response) => {
         // once we are done fetching we can dispatch a redux action with the response data
-        dispatch({ type: ActionTypes.FETCH_PRODUCTS, payload: response.data });
+        dispatch({ type: ActionTypes.FETCH_PRODUCTS, payload: response.data.response });
       })
       .catch((error) => {
         dispatch({ type: ActionTypes.ERROR_SET, error });
@@ -28,14 +31,29 @@ export function fetchProductss() {
   };
 }
 
-export function createProduct(post, history) {
+export function createProduct(product, stores, history) {
   /* axios post */
   return (dispatch) => {
-    axios.post(`${ROOT_URL}/posts`, post, { headers: { authorization: localStorage.getItem('token') } })
+    axios.put(`${ROOT_URL}/products/new`, product, {
+      headers: { authorization: localStorage.getItem('token') },
+    })
       .then((response) => {
-        history.push('/');
+        console.log('Got response 1');
+        const newID = response.data.response.insertId;
+        const newProd = { ProductID: newID, InventoryRemainingDays: product.remainingDays, stores };
+        if (stores.length >= 1) {
+          axios.put(`${ROOT_URL}/storeProducts/new`, newProd, {
+            headers: { authorization: localStorage.getItem('token') },
+          });
+        }
+        axios.put(`${ROOT_URL}/inventory/new`, newProd, {
+          headers: { authorization: localStorage.getItem('token') },
+        }).then((response2) => {
+          history.push('/products');
+        });
       })
       .catch((error) => {
+        console.log(error);
         dispatch({ type: ActionTypes.ERROR_SET, error });
       });
   };
@@ -63,68 +81,131 @@ export function createProduct(post, history) {
 //   };
 // }
 
-export function deleteProduct(id, history) {
+export function deleteProduct(id) {
   /* axios delete */
   console.log('sending delete request');
   return (dispatch) => {
-    axios.delete(`${ROOT_URL}/products/${id}`, { headers: { authorization: localStorage.getItem('token') } }).then((response) => {
-      history.push('/products');
-    }).catch((error) => {
-      console.log(error);
-      dispatch({ type: ActionTypes.ERROR_SET, error });
-    });
+    axios
+      .delete(
+        `${ROOT_URL}/products/delete/${id}`,
+        { headers: { authorization: localStorage.getItem('token') } },
+      )
+      .then((response) => {
+        // eslint-disable-next-line no-restricted-globals
+        location.reload();
+      })
+      .catch((error) => {
+        console.log(error);
+        dispatch({ type: ActionTypes.ERROR_SET, error });
+      });
   };
 }
 
 export function fetchStores() {
   /* axios get */
+  // return (dispatch) => {
+  //   axios
+  //     .put(
+  //       `${ROOT_URL}/storeProducts/new`, { products: 93 },
+  //       { headers: { authorization: localStorage.getItem('token') } },
+  //     )
+  //     .then((response) => {})
+  //     .catch((error) => {
+  //       console.log(error);
+  //       dispatch({ type: ActionTypes.ERROR_SET, error });
+  //     });
+  // };
+  console.log('doing a fetch stores');
   return (dispatch) => {
-    axios.get(`${ROOT_URL}/stores`)
+    axios
+      .get(`${ROOT_URL}/storesByUser`, { headers: { authorization: localStorage.getItem('token') } })
       .then((response) => {
-        // once we are done fetching we can dispatch a redux action with the response data
-        dispatch({ type: ActionTypes.FETCH_PRODUCTS, payload: response.data });
+      // once we are done fetching we can dispatch a redux action with the response data
+        console.log('got response!');
+        console.log(response.data.response);
+        dispatch({ type: ActionTypes.FETCH_STORES, payload: response.data.response });
       })
       .catch((error) => {
+        console.log('got error!');
+        console.log(`ERRROR: ${error}`);
         dispatch({ type: ActionTypes.ERROR_SET, error });
       });
   };
 }
 
-export function createStore(post, history) {
+export function createStore(store, history) {
   /* axios post */
+  console.log('creating a store');
   return (dispatch) => {
-    axios.post(`${ROOT_URL}/posts`, post, { headers: { authorization: localStorage.getItem('token') } })
+    axios
+      .put(`${ROOT_URL}/stores/new`, store, {
+        headers: { authorization: localStorage.getItem('token') },
+      })
       .then((response) => {
-        history.push('/');
+        console.log(response);
+        const newID = response.data.response.insertId;
+        console.log(`ID is: ${newID}`);
+        console.log('putting into rel table');
+        axios.put(`${ROOT_URL}/stores/newUser`, { StoreID: newID }, {
+          headers: { authorization: localStorage.getItem('token') },
+        }).then((response2) => {
+          history.push('/stores');
+        });
       })
       .catch((error) => {
+        console.log(error);
         dispatch({ type: ActionTypes.ERROR_SET, error });
       });
   };
 }
 
-export function updateStore(post, id) {
+export function updateStore(store, history) {
   /* axios put */
+  console.log('calling updatescore');
+  console.log(`store is :${JSON.stringify(store)}`);
   return (dispatch) => {
-    axios.put(`${ROOT_URL}/stores/${id}`, post, { headers: { authorization: localStorage.getItem('token') } }).then((response) => {
-      dispatch({ type: ActionTypes.FETCH_POST, payload: response.data });
-    }).catch((error) => {
-      dispatch({ type: ActionTypes.ERROR_SET, error });
-    });
+    axios
+      .post(`${ROOT_URL}/stores/update`, store, {
+        headers: { authorization: localStorage.getItem('token') },
+      })
+      .then((response) => {
+        history.push('/stores');
+      })
+      .catch((error) => {
+        console.log(error);
+        dispatch({ type: ActionTypes.ERROR_SET, error });
+      });
   };
 }
 
-export function deleteStore(id) {
+export function deleteStore(id, history) {
   /* axios delete */
   console.log('sending delete request');
+  console.log(id);
+  // const storeToDelete = { StoreID: id };
   return (dispatch) => {
-    axios.delete(`${ROOT_URL}/products/${id}`, { headers: { authorization: localStorage.getItem('token') } }).then((response) => {
-      console.log(response);
-      // history.push('/products');
-    }).catch((error) => {
-      console.log(error);
-      dispatch({ type: ActionTypes.ERROR_SET, error });
-    });
+    axios
+      .delete(
+        `${ROOT_URL}/stores/delete/${id}`,
+        { headers: { authorization: localStorage.getItem('token') } },
+      )
+      .then((response) => {
+        console.log(response);
+        // fetchStores();
+        // eslint-disable-next-line no-restricted-globals
+        location.reload();
+      })
+      .catch((error) => {
+        console.log(error);
+        dispatch({ type: ActionTypes.ERROR_SET, error });
+      });
+  };
+}
+
+export function setStore(store) {
+  return {
+    type: ActionTypes.SET_STORE,
+    payload: store,
   };
 }
 
@@ -136,10 +217,12 @@ export function signinUser(user, history) {
   //  dispatch({ type: ActionTypes.AUTH_USER });
   //  localStorage.setItem('token', response.data.token);
   // on error should dispatch(authError(`Sign In Failed: ${error.response.data}`));
+  console.log('Signing In');
   return (dispatch) => {
-    axios.post(`${ROOT_URL}/signin`, user)
+    axios
+      .post(`${ROOT_URL}/signin`, user)
       .then((response) => {
-        console.log('signin response');
+        console.log(`signin response :${response}`);
         dispatch({ type: ActionTypes.AUTH_USER });
         localStorage.setItem('token', response.data.token);
         history.push('/');
@@ -148,36 +231,37 @@ export function signinUser(user, history) {
         console.log(`signin error: ${error}`);
 
         // eslint-disable-next-line no-alert
-        alert('Wrong Username or Password');
-        dispatch({ type: ActionTypes.AUTH_ERROR, message: `Sign in Failed: ${error}` });
+        // alert('Wrong Username or Password');
+        dispatch({
+          type: ActionTypes.AUTH_ERROR,
+          message: `Sign in Failed: ${error}`,
+        });
       });
   };
 }
 
-
 export function signupUser(user, history) {
-  // takes in an object with email and password (minimal user object)
-  // returns a thunk method that takes dispatch as an argument (just like our create post method really)
-  // does an axios.post on the /signup endpoint (only difference from above)
-  // on success does:
-  //  dispatch({ type: ActionTypes.AUTH_USER });
-  //  localStorage.setItem('token', response.data.token);
-  // on error should dispatch(authError(`Sign Up Failed: ${error.response.data}`));
+  console.log(`Signing up user: ${JSON.stringify(user)}`);
   return (dispatch) => {
-    axios.post(`${ROOT_URL}/signup`, user)
+    axios
+      .put(`${ROOT_URL}/signup`, user)
       .then((response) => {
+        console.log(response);
         dispatch({ type: ActionTypes.AUTH_USER });
         localStorage.setItem('token', response.data.token);
         history.push('/');
       })
       .catch((error) => {
+        console.log(error);
         // eslint-disable-next-line no-alert
         alert('Error Signing Up, verify Email is not already taken');
-        dispatch({ type: ActionTypes.AUTH_ERROR, message: `Sign up Failed: ${error}` });
+        dispatch({
+          type: ActionTypes.AUTH_ERROR,
+          message: `Sign up Failed: ${error}`,
+        });
       });
   };
 }
-
 
 // deletes token from localstorage
 // and deauths
