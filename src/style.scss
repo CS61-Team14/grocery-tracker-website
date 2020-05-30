@@ -1,9 +1,14 @@
 
-$bgcolor : rgb(85, 190, 255);
+$bgcolor : rgb(0, 140, 255);
 
 html, body {
   font-family: "Roboto", sans-serif;
   background: $bgcolor;
+}
+
+h1 {
+  font-weight: 500;
+  color: rgb(235, 235, 235);
 }
 
 .table {

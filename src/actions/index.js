@@ -6,13 +6,38 @@ const ROOT_URL = 'http://localhost:3307/api';
 export const ActionTypes = {
   FETCH_PRODUCTS: 'FETCH_PRODUCTS',
   FETCH_PRODUCT: 'FETCH_PRODUCT',
+  FETCH_SHOPPING_LIST: 'FETCH_SHOPPING_LIST',
   CREATE_STORE: 'CREATE_STORE',
   FETCH_STORES: 'CREATE_STORE',
   AUTH_USER: 'AUTH_USER',
   DEAUTH_USER: 'DEAUTH_USER',
   AUTH_ERROR: 'AUTH_ERROR',
   SET_STORE: 'SET_STORE',
+  ERROR_SET: 'ERROR_SET',
 };
+
+export function fetchShoppingList(store) {
+  /* axios get */
+  console.log('Sending Shopping list request');
+  const param = `?storeID=${store}`;
+  // const route = `${ROOT_URL}/shoppingList${param}`;
+  // console.log(route);
+  return (dispatch) => {
+    axios
+      .get(`${ROOT_URL}/shoppingList${param}`, {
+        headers: { authorization: localStorage.getItem('token') },
+      })
+      .then((response) => {
+        // once we are done fetching we can dispatch a redux action with the response data
+        console.log(response);
+        dispatch({ type: ActionTypes.FETCH_SHOPPING_LIST, payload: response.data.response });
+      })
+      .catch((error) => {
+        console.log(error);
+        dispatch({ type: ActionTypes.ERROR_SET, error });
+      });
+  };
+}
 
 export function fetchProducts() {
   /* axios get */
@@ -59,28 +84,6 @@ export function createProduct(product, stores, history) {
   };
 }
 
-// export function updateProduct(post, id) {
-//   /* axios put */
-//   return (dispatch) => {
-//     axios.put(`${ROOT_URL}/posts/${id}`, post, { headers: { authorization: localStorage.getItem('token') } }).then((response) => {
-//       dispatch({ type: ActionTypes.FETCH_POST, payload: response.data });
-//     }).catch((error) => {
-//       dispatch({ type: ActionTypes.ERROR_SET, error });
-//     });
-//   };
-// }
-
-// export function fetchPost(id) {
-//   /* axios get */
-//   return (dispatch) => {
-//     axios.get(`${ROOT_URL}/posts/${id}`).then((response) => {
-//       dispatch({ type: ActionTypes.FETCH_POST, payload: response.data });
-//     }).catch((error) => {
-//       dispatch({ type: ActionTypes.ERROR_SET, error });
-//     });
-//   };
-// }
-
 export function deleteProduct(id) {
   /* axios delete */
   console.log('sending delete request');
@@ -102,19 +105,6 @@ export function deleteProduct(id) {
 }
 
 export function fetchStores() {
-  /* axios get */
-  // return (dispatch) => {
-  //   axios
-  //     .put(
-  //       `${ROOT_URL}/storeProducts/new`, { products: 93 },
-  //       { headers: { authorization: localStorage.getItem('token') } },
-  //     )
-  //     .then((response) => {})
-  //     .catch((error) => {
-  //       console.log(error);
-  //       dispatch({ type: ActionTypes.ERROR_SET, error });
-  //     });
-  // };
   console.log('doing a fetch stores');
   return (dispatch) => {
     axios
@@ -134,7 +124,6 @@ export function fetchStores() {
 }
 
 export function createStore(store, history) {
-  /* axios post */
   console.log('creating a store');
   return (dispatch) => {
     axios
@@ -210,13 +199,6 @@ export function setStore(store) {
 }
 
 export function signinUser(user, history) {
-  // takes in an object with email and password (minimal user object)
-  // returns a thunk method that takes dispatch as an argument (just like our create post method really)
-  // does an axios.post on the /signin endpoint
-  // on success does:
-  //  dispatch({ type: ActionTypes.AUTH_USER });
-  //  localStorage.setItem('token', response.data.token);
-  // on error should dispatch(authError(`Sign In Failed: ${error.response.data}`));
   console.log('Signing In');
   return (dispatch) => {
     axios
@@ -273,8 +255,6 @@ export function signoutUser(history) {
   };
 }
 
-// trigger to deauth if there is error
-// can also use in your error reducer if you have one to display an error message
 export function authError(error) {
   return {
     type: ActionTypes.AUTH_ERROR,
