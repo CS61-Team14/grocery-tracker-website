@@ -21,6 +21,7 @@ class Home extends Component {
       const prod = JSON.parse(forms[i].elements['form-check'].value);
       const quantity = parseInt(forms[i].elements['form-quantity'].value);
       const days = parseInt(prod.DaysPerWidget) * quantity * (forms[i].elements['form-check'].checked ? 1 : 0);
+      forms[i].elements['form-check'].checked = false;
       if (!(prod.ProductID in toBuy)) {
         toBuy[prod.ProductID] = days;
       } else {
