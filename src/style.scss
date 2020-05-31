@@ -17,7 +17,7 @@ h1 {
 }
 
 .col-small{
-  width: 15%;
+  width: 150px;
 }
 
 .button-group {
@@ -31,3 +31,28 @@ h1 {
   justify-self: right;
 }
 
+.quantity-input{
+  width: 65px;
+}
+
+.buy-check{
+  align-self: center;
+  justify-self: center;
+  -webkit-transform: scale(1.5);
+}
+
+.check-col{
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+}
+
+.form-buy{
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  justify-items: center;
+}

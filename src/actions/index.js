@@ -23,6 +23,7 @@ export function fetchShoppingList(store) {
   // const route = `${ROOT_URL}/shoppingList${param}`;
   // console.log(route);
   return (dispatch) => {
+    console.log('Axios: Fetching shopping list');
     axios
       .get(`${ROOT_URL}/shoppingList${param}`, {
         headers: { authorization: localStorage.getItem('token') },
@@ -31,6 +32,36 @@ export function fetchShoppingList(store) {
         // once we are done fetching we can dispatch a redux action with the response data
         console.log(response);
         dispatch({ type: ActionTypes.FETCH_SHOPPING_LIST, payload: response.data.response });
+      })
+      .catch((error) => {
+        console.log(error);
+        dispatch({ type: ActionTypes.ERROR_SET, error });
+      });
+  };
+}
+
+export function buyStuff(stuffToBuy) {
+  console.log('In Buy Stuff!');
+  return (dispatch) => {
+    console.log('goneShopping Axios call');
+    axios
+      .post(`${ROOT_URL}/inventory/goneShopping`, { products: stuffToBuy }, {
+        headers: { authorization: localStorage.getItem('token') },
+      })
+      .then((response) => {
+        // once we are done fetching we can dispatch a redux action with the response data
+        const param = '?storeID=all';
+        console.log('got a Response');
+        axios
+          .get(`${ROOT_URL}/shoppingList${param}`, {
+            headers: { authorization: localStorage.getItem('token') },
+          })
+          .then((response2) => {
+            // once we are done fetching we can dispatch a redux action with the response data
+            // console.log('RESPONSE 2');
+            // console.log(response2);
+            dispatch({ type: ActionTypes.FETCH_SHOPPING_LIST, payload: response2.data.response });
+          });
       })
       .catch((error) => {
         console.log(error);
